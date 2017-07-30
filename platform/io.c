@@ -1164,15 +1164,19 @@ static int ioWrite(struct s_io_state *iostate, const int id, const unsigned char
 	struct sockaddr_in6 *destination_sockaddr_v6;
 	struct sockaddr_in *destination_sockaddr_v4;
 
+	printf("staring of ioWrite function\n");
 	switch(iostate->handle[id].type) {
 		case IO_TYPE_SOCKET_V6:
+			printf("taking ipv6 path for this packget\n");
 			if(destination_addr != NULL) {
+					printf("ipv6 address is not null\n");
 				if(memcmp(destination_addr->addr, IO_ADDRTYPE_UDP6, 4) == 0) {
 					destination_sockaddr_v6 = (struct sockaddr_in6 *)&destination_sockaddr;
 					memset(destination_sockaddr_v6, 0, sizeof(struct sockaddr_in6));
 					destination_sockaddr_v6->sin6_family = AF_INET6;
 					memcpy(destination_sockaddr_v6->sin6_addr.s6_addr, &destination_addr->addr[4], 16);
 					memcpy(&destination_sockaddr_v6->sin6_port, &destination_addr->addr[20], 2);
+					printf("ipv6 before iohelpersendto in memcpy successfull\n");
 					ret = ioHelperSendTo(&iostate->handle[id], write_buf, write_buf_size, (struct sockaddr *)destination_sockaddr_v6, sizeof(struct sockaddr_in6));
 				}
 				else if((iostate->nat64clat > 0) && (memcmp(destination_addr->addr, IO_ADDRTYPE_UDP4, 4) == 0)) {
@@ -1182,6 +1186,7 @@ static int ioWrite(struct s_io_state *iostate, const int id, const unsigned char
 					memcpy(destination_sockaddr_v6->sin6_addr.s6_addr, iostate->nat64_prefix, 12);
 					memcpy(&destination_sockaddr_v6->sin6_addr.s6_addr[12], &destination_addr->addr[4], 4);
 					memcpy(&destination_sockaddr_v6->sin6_port, &destination_addr->addr[8], 2);
+					printf("ipv6 before iohelpersendto memcpy unsucessful\n");
 					ret = ioHelperSendTo(&iostate->handle[id], write_buf, write_buf_size, (struct sockaddr *)destination_sockaddr_v6, sizeof(struct sockaddr_in6));
 				}
 				else {
@@ -1211,6 +1216,7 @@ static int ioWrite(struct s_io_state *iostate, const int id, const unsigned char
 			}
 			break;
 		case IO_TYPE_FILE:
+			prinf("io type is file\n");
 			ret = ioHelperWriteFile(&iostate->handle[id], write_buf, write_buf_size);
 			break;
 		default:
